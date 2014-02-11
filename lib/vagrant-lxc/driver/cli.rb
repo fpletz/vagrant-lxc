@@ -45,18 +45,13 @@ module Vagrant
           end
         end
 
-        def create(template, config_file, template_opts = {})
-          if config_file
-            config_opts = ['-f', config_file]
-          end
-
+        def create(template, template_opts = {})
           extra = template_opts.to_a.flatten
           extra.unshift '--' unless extra.empty?
 
           run :create,
               '--template', template,
               '--name',     @name,
-              *(config_opts),
               *extra
         rescue Errors::ExecuteError => e
           if e.stderr =~ /already exists/i
@@ -122,6 +117,10 @@ module Vagrant
             # TODO: Raise an user friendly message
             raise TargetStateNotReached.new target_state, last_state
           end
+        end
+
+        def append_config(from_config, to_config)
+          @sudo_wrapper.run('/bin/bash', '-c', "cat #{from_config} >> #{to_config}")
         end
 
         private

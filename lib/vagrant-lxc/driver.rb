@@ -47,13 +47,16 @@ module Vagrant
         @sudo_wrapper.run('cat', base_path.join('config').to_s)
       end
 
-      def create(name, template_path, config_file, template_options = {})
+      def create(name, template_path, template_config_file, template_options = {})
         @cli.name = @container_name = name
 
         import_template(template_path) do |template_name|
           @logger.debug "Creating container..."
-          @cli.create template_name, config_file, template_options
+          @cli.create template_name, template_options
         end
+
+        container_config_file = File.join [CONTAINERS_PATH, name, 'config']
+        @cli.append_config template_config_file, container_config_file
       end
 
       def share_folders(folders)
